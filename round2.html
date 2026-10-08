@@ -143,16 +143,24 @@
 // 2. Build > Realtime Database > Create Database (test mode is fine for a short event).
 // 3. Project settings > General > Your apps > Add app (</>) > copy the config below in.
 // 4. Paste the SAME config into all 5 round HTML files.
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyByncRh8sAR0ENlZ491lNLqByNeKzJYcMY",
+  authDomain: "infotrust-foundation-d74d7.firebaseapp.com",
+  databaseURL: "https://infotrust-foundation-d74d7-default-rtdb.firebaseio.com",
+  projectId: "infotrust-foundation-d74d7",
+  storageBucket: "infotrust-foundation-d74d7.firebasestorage.app",
+  messagingSenderId: "583747131135",
+  appId: "1:583747131135:web:c59f41ff1b51c8e71edeca"
 };
-const ROUND_PATH = 'rounds/round2/responses';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 // ============================================================
 
 function johnnySay(msg, cheer){

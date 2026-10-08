@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InfoTrust Trivia · Admin Reset</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#00254b; --bg2:#01336a; --card:#0a3f7c;
+    --accent:#0082e4; --coral:#4fb6ff;
+    --text:#ffffff; --text-dim:#a9cdf0; --good:#3ddc97; --bad:#ff6b6b;
+    --border:rgba(255,255,255,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background-image:radial-gradient(circle at 15% 0%, rgba(0,130,228,0.22), transparent 45%),
+                      radial-gradient(circle at 100% 100%, rgba(79,182,255,0.12), transparent 40%);
+    display:flex; justify-content:center; padding:40px 16px;
+  }
+  .wrap{max-width:520px; width:100%;}
+  h1{
+    font-family:'Poppins',sans-serif; font-weight:800; font-size:26px;
+    text-align:center; margin:0 0 6px;
+  }
+  .sub{text-align:center; color:var(--text-dim); font-size:14px; margin-bottom:28px;}
+  .row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:linear-gradient(180deg, var(--card), var(--bg2));
+    border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-bottom:12px;
+  }
+  .row .label{font-family:'Poppins',sans-serif; font-weight:700; font-size:15px;}
+  .row .count{font-size:12px; color:var(--text-dim); margin-top:2px;}
+  button{
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:13px; border:none;
+    border-radius:10px; padding:10px 16px; cursor:pointer; color:#fff;
+    background:var(--bad); transition:opacity .15s ease;
+  }
+  button:hover{opacity:.85;}
+  button:disabled{opacity:.4; cursor:default;}
+  .all-btn{
+    width:100%; padding:16px; font-size:15px; background:var(--accent); margin-top:18px;
+  }
+  .status{text-align:center; margin-top:14px; font-size:13px; color:var(--text-dim); min-height:18px;}
+  .status.ok{color:var(--good);}
+  .status.err{color:var(--bad);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trivia Data Reset</h1>
+  <div class="sub">InfoTrust Foundation &middot; Admin only &mdash; this deletes guesses permanently.</div>
+
+  <div class="row"><div><div class="label">Round 1</div><div class="count" id="count-round1">loading…</div></div><button onclick="resetRound('round1')">Reset</button></div>
+  <div class="row"><div><div class="label">Round 2</div><div class="count" id="count-round2">loading…</div></div><button onclick="resetRound('round2')">Reset</button></div>
+  <div class="row"><div><div class="label">Round 3</div><div class="count" id="count-round3">loading…</div></div><button onclick="resetRound('round3')">Reset</button></div>
+  <div class="row"><div><div class="label">Round 4</div><div class="count" id="count-round4">loading…</div></div><button onclick="resetRound('round4')">Reset</button></div>
+  <div class="row"><div><div class="label">Round 5</div><div class="count" id="count-round5">loading…</div></div><button onclick="resetRound('round5')">Reset</button></div>
+
+  <button class="all-btn" onclick="resetAll()">Reset All 5 Rounds</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyByncRh8sAR0ENlZ491lNLqByNeKzJYcMY",
+  authDomain: "infotrust-foundation-d74d7.firebaseapp.com",
+  databaseURL: "https://infotrust-foundation-d74d7-default-rtdb.firebaseio.com",
+  projectId: "infotrust-foundation-d74d7",
+  storageBucket: "infotrust-foundation-d74d7.firebasestorage.app",
+  messagingSenderId: "583747131135",
+  appId: "1:583747131135:web:c59f41ff1b51c8e71edeca"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ROUNDS = ['round1','round2','round3','round4','round5'];
+
+function qs(id){ return document.getElementById(id); }
+
+function refreshCounts(){
+  ROUNDS.forEach(r=>{
+    db.ref('rounds/' + r + '/responses').once('value').then(snap=>{
+      const n = snap.exists() ? Object.keys(snap.val()).length : 0;
+      qs('count-' + r).textContent = n + (n===1 ? ' response' : ' responses');
+    }).catch(()=>{
+      qs('count-' + r).textContent = 'error loading';
+    });
+  });
+}
+
+function resetRound(round){
+  if(!confirm('Delete all responses for ' + round + '? This cannot be undone.')) return;
+  db.ref('rounds/' + round + '/responses').remove().then(()=>{
+    qs('status').textContent = round + ' cleared.';
+    qs('status').className = 'status ok';
+    refreshCounts();
+  }).catch(e=>{
+    qs('status').textContent = 'Error: ' + e.message;
+    qs('status').className = 'status err';
+  });
+}
+
+function resetAll(){
+  if(!confirm('Delete ALL responses for ALL 5 rounds? This cannot be undone.')) return;
+  db.ref('rounds').remove().then(()=>{
+    qs('status').textContent = 'All rounds cleared.';
+    qs('status').className = 'status ok';
+    refreshCounts();
+  }).catch(e=>{
+    qs('status').textContent = 'Error: ' + e.message;
+    qs('status').className = 'status err';
+  });
+}
+
+refreshCounts();
+</script>
+</body>
+</html>
